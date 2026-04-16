@@ -1,8 +1,113 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Offers Admin</title>
-  <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Offers Admin · Cafe Backyard</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --cream:      #F7F0E6;
+      --linen:      #EDE3D5;
+      --bark:       #C4A882;
+      --soil:       #7A5C3E;
+      --espresso:   #3B2410;
+      --moss:       #5A6B4B;
+      --rust:       #B05A2F;
+      --sand:       #D9C9B0;
+      --warm-white: #FBF7F2;
+    }
+    body { font-family: 'Segoe UI', sans-serif; background: #f4f4f4; color: #222; min-height: 100vh; }
+
+    .navbar {
+      display: flex; justify-content: space-between; align-items: center;
+      background: var(--espresso); padding: 0 32px; height: 58px;
+      position: sticky; top: 0; z-index: 100;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.3);
+    }
+    .logo { font-size: 1.1rem; font-weight: 600; color: var(--bark); }
+    .nav-links { display: flex; gap: 4px; }
+    .nav-links a {
+      color: var(--sand); text-decoration: none; font-size: 0.82rem;
+      font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase;
+      padding: 7px 14px; border-radius: 2px; transition: color 0.2s, background 0.2s;
+    }
+    .nav-links a:hover { color: var(--bark); }
+    .nav-links a.active { color: var(--bark); background: rgba(196,168,130,0.12); }
+
+    .page { max-width: 900px; margin: 0 auto; padding: 40px 24px 80px; }
+    .page-title { font-size: 1.5rem; font-weight: 600; color: var(--espresso); margin-bottom: 4px; }
+    .page-sub { font-size: 0.87rem; color: #666; margin-bottom: 28px; }
+
+    .add-form {
+      background: #fff; border: 1px solid #ddd; border-radius: 6px;
+      padding: 24px 28px; margin-bottom: 32px;
+    }
+    .form-title { font-size: 0.85rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: #555; margin-bottom: 16px; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+    .form-row-full { margin-bottom: 12px; }
+    .field label { display: block; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.1em; color: #888; margin-bottom: 5px; }
+    .field input, .field textarea {
+      width: 100%; padding: 10px 13px;
+      border: 1.5px solid #ddd; border-radius: 4px;
+      font-family: 'Segoe UI', sans-serif; font-size: 0.9rem; color: #222;
+      outline: none; transition: border-color 0.2s; resize: none;
+    }
+    .field input:focus, .field textarea:focus { border-color: var(--soil); }
+
+    .add-btn {
+      background: var(--espresso); color: #fff; border: none; cursor: pointer;
+      font-family: 'Segoe UI', sans-serif; font-size: 0.84rem; font-weight: 500;
+      letter-spacing: 0.06em; text-transform: uppercase;
+      padding: 11px 26px; border-radius: 4px; transition: background 0.2s;
+    }
+    .add-btn:hover { background: var(--rust); }
+
+    .list-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+    .list-title { font-size: 1rem; font-weight: 600; color: var(--espresso); }
+    .item-count-badge { background: var(--linen); color: var(--soil); font-size: 0.75rem; padding: 3px 10px; border-radius: 12px; font-weight: 500; }
+
+    #offersList { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }
+
+    .offer-row {
+      background: #fff; border: 1px solid #e8e8e8; border-radius: 6px;
+      overflow: hidden; display: flex; flex-direction: column;
+      animation: fadeIn 0.25s ease both;
+    }
+    @keyframes fadeIn { from{opacity:0;transform:translateY(6px);} to{opacity:1;transform:translateY(0);} }
+
+    .offer-row-img { width: 100%; height: 140px; object-fit: cover; display: block; }
+    .offer-row-no-img {
+      height: 80px; background: var(--linen);
+      display: flex; align-items: center; justify-content: center; font-size: 2rem;
+    }
+    .offer-row-body { padding: 14px 16px 16px; flex: 1; display: flex; flex-direction: column; gap: 4px; }
+    .offer-row-title { font-size: 0.95rem; font-weight: 600; color: #222; }
+    .offer-row-desc { font-size: 0.82rem; color: #666; line-height: 1.5; flex: 1; }
+    .offer-row-price { font-size: 1rem; font-weight: 600; color: var(--rust); margin-top: 4px; }
+
+    .offer-row-footer { padding: 10px 16px; border-top: 1px solid #f0f0f0; }
+    .del-btn {
+      width: 100%; font-family: 'Segoe UI', sans-serif; font-size: 0.78rem;
+      font-weight: 500; padding: 8px; border-radius: 4px; cursor: pointer;
+      background: #fff; color: #999; border: 1px solid #e0e0e0;
+      transition: all 0.18s;
+    }
+    .del-btn:hover { border-color: var(--rust); color: var(--rust); background: #FEF2F2; }
+
+    .empty-list { grid-column: 1/-1; text-align: center; padding: 48px 20px; color: #888; font-size: 0.9rem; }
+
+    .toast {
+      position: fixed; bottom: 24px; right: 24px;
+      background: var(--espresso); color: #fff;
+      padding: 11px 20px; border-radius: 4px; font-size: 0.85rem;
+      border-left: 3px solid var(--bark);
+      opacity: 0; transform: translateY(10px);
+      transition: opacity 0.3s, transform 0.3s;
+      pointer-events: none; z-index: 500;
+    }
+    .toast.show { opacity: 1; transform: translateY(0); }
+  </style>
 </head>
 <body>
 
@@ -11,22 +116,47 @@
   <div class="nav-links">
     <a href="/admin.html">Orders</a>
     <a href="/menu-admin.html">Menu</a>
-    <a href="/offers-admin.html">Offers</a>
+    <a href="/offers-admin.html" class="active">Offers</a>
     <a href="/revenue.html">Revenue</a>
-    <a href="#" onclick="logout()">Logout</a>
+    <a href="#" onclick="logout(); return false;">Logout</a>
   </div>
 </nav>
 
-<h2>🔥 Manage Offers</h2>
+<div class="page">
+  <h1 class="page-title">Offers Management</h1>
+  <p class="page-sub">Add or remove special offers shown to customers.</p>
 
-<input id="title" placeholder="Offer title">
-<input id="description" placeholder="Description">
-<input id="price" placeholder="Price">
-<input id="image" placeholder="Image URL (optional)">
-<button onclick="addOffer()">Add Offer</button>
+  <div class="add-form">
+    <p class="form-title">Add new offer</p>
+    <div class="form-row">
+      <div class="field">
+        <label>Offer title</label>
+        <input id="title" placeholder="e.g. Weekend Combo" />
+      </div>
+      <div class="field">
+        <label>Price (₹)</label>
+        <input id="price" type="number" placeholder="e.g. 199" />
+      </div>
+    </div>
+    <div class="form-row-full field">
+      <label>Description</label>
+      <textarea id="description" rows="2" placeholder="Describe the offer…"></textarea>
+    </div>
+    <div class="form-row-full field" style="margin-bottom:16px">
+      <label>Image URL (optional)</label>
+      <input id="image" placeholder="https://..." />
+    </div>
+    <button class="add-btn" onclick="addOffer()">+ Add Offer</button>
+  </div>
 
-<hr>
-<div id="offersList"></div>
+  <div class="list-header">
+    <span class="list-title">Active offers</span>
+    <span class="item-count-badge" id="offer-count">0 offers</span>
+  </div>
+  <div id="offersList"></div>
+</div>
+
+<div class="toast" id="toast"></div>
 
 <script src="offers-admin.js"></script>
 </body>

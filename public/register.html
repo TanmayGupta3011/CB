@@ -1,46 +1,243 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Register - Cafe Backyard</title>
-  <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Register · Cafe Backyard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet"/>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    :root{
+      --cream:#F7F0E6;--linen:#EDE3D5;--bark:#C4A882;--soil:#7A5C3E;
+      --espresso:#3B2410;--moss:#5A6B4B;--rust:#B05A2F;--sand:#D9C9B0;
+      --warm-white:#FBF7F2;
+      --fd:'Playfair Display',Georgia,serif;--fb:'DM Sans','Segoe UI',sans-serif;
+    }
+    body{font-family:var(--fb);background:var(--espresso);min-height:100vh;display:flex;flex-direction:column;}
+    body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradient(45deg,transparent,transparent 40px,rgba(255,255,255,0.012) 40px,rgba(255,255,255,0.012) 41px);pointer-events:none;z-index:0;}
+
+    .page-wrap{flex:1;display:flex;align-items:center;justify-content:center;padding:40px 16px;position:relative;z-index:1;}
+
+    .auth-card{background:var(--warm-white);border-radius:6px;width:100%;max-width:440px;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,0.4);}
+
+    .card-head{background:var(--espresso);padding:28px 36px 24px;border-bottom:1px solid rgba(196,168,130,0.2);}
+    .brand{display:flex;align-items:center;gap:10px;margin-bottom:16px;}
+    .brand-dot{width:8px;height:8px;border-radius:50%;background:var(--bark);}
+    .brand-name{font-family:var(--fd);font-size:1rem;color:var(--bark);}
+    .brand-name em{font-style:italic;color:var(--sand);}
+    .card-title{font-family:var(--fd);font-size:1.6rem;color:var(--cream);font-weight:400;}
+    .card-title em{font-style:italic;color:var(--bark);}
+    .card-sub{color:var(--sand);font-size:0.83rem;margin-top:5px;}
+
+    .card-body{padding:24px 36px 28px;}
+
+    /* divider between sections */
+    .section-divider{font-size:0.68rem;text-transform:uppercase;letter-spacing:0.14em;color:var(--bark);margin:18px 0 14px;display:flex;align-items:center;gap:10px;}
+    .section-divider::before,.section-divider::after{content:'';flex:1;height:1px;background:var(--linen);}
+
+    .field{margin-bottom:14px;}
+    .field label{display:block;font-size:0.71rem;text-transform:uppercase;letter-spacing:0.12em;color:var(--soil);margin-bottom:5px;font-weight:500;}
+    .required-star{color:var(--rust);margin-left:2px;}
+
+    .field input,
+    .field select{
+      width:100%;padding:11px 13px;
+      border:1.5px solid var(--sand);border-radius:3px;
+      font-family:var(--fb);font-size:0.91rem;
+      color:var(--espresso);background:var(--cream);
+      outline:none;transition:border-color 0.2s,box-shadow 0.2s;
+      appearance:none;
+    }
+    .field input:focus,
+    .field select:focus{border-color:var(--soil);box-shadow:0 0 0 3px rgba(122,92,62,0.1);}
+    .field input::placeholder{color:var(--bark);}
+    .field-hint{font-size:0.71rem;color:var(--bark);margin-top:4px;}
+
+    /* phone row */
+    .phone-row{display:flex;gap:8px;}
+    .phone-prefix{padding:11px 13px;background:var(--linen);border:1.5px solid var(--sand);border-radius:3px;font-size:0.91rem;color:var(--soil);white-space:nowrap;flex-shrink:0;display:flex;align-items:center;}
+    .phone-row input{flex:1;}
+
+    /* password toggle */
+    .pw-wrap{position:relative;}
+    .pw-wrap input{padding-right:42px;}
+    .pw-toggle{position:absolute;right:11px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:0.88rem;color:var(--bark);padding:2px;transition:color 0.2s;}
+    .pw-toggle:hover{color:var(--soil);}
+
+    .submit-btn{
+      width:100%;padding:13px;margin-top:6px;
+      background:var(--espresso);color:var(--cream);
+      border:none;border-radius:3px;cursor:pointer;
+      font-family:var(--fb);font-size:0.88rem;font-weight:500;
+      letter-spacing:0.07em;text-transform:uppercase;
+      transition:background 0.2s,transform 0.15s;
+    }
+    .submit-btn:hover{background:var(--rust);transform:translateY(-1px);}
+    .submit-btn:active{transform:scale(0.98);}
+    .submit-btn:disabled{opacity:0.6;cursor:wait;transform:none;}
+
+    .msg{font-size:0.82rem;text-align:center;margin-top:13px;padding:8px 12px;border-radius:3px;display:none;}
+    .msg.error  {display:block;background:#FEE2E2;color:#991B1B;border:1px solid #FECACA;}
+    .msg.success{display:block;background:#D1FAE5;color:#065F46;border:1px solid #6EE7B7;}
+
+    .card-footer{text-align:center;margin-top:16px;font-size:0.83rem;color:var(--soil);}
+    .card-footer a{color:var(--rust);text-decoration:none;font-weight:500;}
+    .card-footer a:hover{text-decoration:underline;}
+
+    .bottom-brand{text-align:center;padding:18px;position:relative;z-index:1;}
+    .bottom-brand p{font-size:0.76rem;color:rgba(196,168,130,0.4);}
+    .bottom-brand strong{color:var(--bark);font-family:var(--fd);font-style:italic;}
+  </style>
 </head>
 <body>
 
-<nav class="navbar">
-  <div class="logo">Cafe Backyard</div>
-</nav>
+<div class="page-wrap">
+  <div class="auth-card">
 
-<h2>Register</h2>
+    <div class="card-head">
+      <div class="brand">
+        <div class="brand-dot"></div>
+        <div class="brand-name">Cafe <em>Backyard</em></div>
+      </div>
+      <h1 class="card-title">Join <em>us</em></h1>
+      <p class="card-sub">Create your account to start ordering.</p>
+    </div>
 
-<input id="username" placeholder="Username"><br><br>
-<input id="password" type="password" placeholder="Password"><br><br>
+    <div class="card-body">
 
-<button onclick="register()">Register</button>
+      <!-- ACCOUNT DETAILS -->
+      <div class="field">
+        <label>Username <span class="required-star">*</span></label>
+        <input id="username" type="text" placeholder="choose_a_username" autocomplete="username"/>
+      </div>
 
-<p>Already have an account? <a href="/login.html">Login here</a></p>
+      <div class="field">
+        <label>Phone number <span class="required-star">*</span></label>
+        <div class="phone-row">
+          <span class="phone-prefix">+91</span>
+          <input id="phone" type="tel" placeholder="9876543210" maxlength="10"/>
+        </div>
+        <p class="field-hint">Unique — one account per number.</p>
+      </div>
+
+      <div class="field">
+        <label>Password <span class="required-star">*</span></label>
+        <div class="pw-wrap">
+          <input id="password" type="password" placeholder="Min. 6 characters" autocomplete="new-password"/>
+          <button class="pw-toggle" type="button" onclick="togglePw('password','t1')" id="t1">👁</button>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Confirm password <span class="required-star">*</span></label>
+        <div class="pw-wrap">
+          <input id="confirm" type="password" placeholder="Re-enter password" autocomplete="new-password"/>
+          <button class="pw-toggle" type="button" onclick="togglePw('confirm','t2')" id="t2">👁</button>
+        </div>
+      </div>
+
+      <!-- SECURITY QUESTION -->
+      <div class="section-divider">Security question</div>
+
+      <div class="field">
+        <label>Choose a question <span class="required-star">*</span></label>
+        <select id="securityQuestion">
+          <option value="" disabled selected>Select a question…</option>
+          <option value="What was the name of your first pet?">What was the name of your first pet?</option>
+          <option value="What is your mother's maiden name?">What is your mother's maiden name?</option>
+          <option value="What city were you born in?">What city were you born in?</option>
+          <option value="What was the name of your primary school?">What was the name of your primary school?</option>
+          <option value="What is your oldest sibling's middle name?">What is your oldest sibling's middle name?</option>
+          <option value="What street did you grow up on?">What street did you grow up on?</option>
+          <option value="What was the make of your first car?">What was the make of your first car?</option>
+          <option value="What is your favourite childhood book?">What is your favourite childhood book?</option>
+        </select>
+        <p class="field-hint">You'll need this to reset your password.</p>
+      </div>
+
+      <div class="field">
+        <label>Your answer <span class="required-star">*</span></label>
+        <input id="securityAnswer" type="text" placeholder="Answer (case-insensitive)" autocomplete="off"/>
+        <p class="field-hint">Remember this — it's how you recover your account.</p>
+      </div>
+
+      <button class="submit-btn" id="regBtn" onclick="register()">Create Account</button>
+      <div class="msg" id="msg"></div>
+      <p class="card-footer">Already have an account? <a href="/login.html">Sign in</a></p>
+    </div>
+
+  </div>
+</div>
+
+<div class="bottom-brand"><p>© 2024 <strong>Cafe Backyard</strong> · Made with warmth.</p></div>
 
 <script>
+function showMsg(text, type) {
+  const el = document.getElementById('msg');
+  el.textContent = text;
+  el.className = 'msg ' + type;
+}
+
+function togglePw(inputId, btnId) {
+  const input = document.getElementById(inputId);
+  const btn   = document.getElementById(btnId);
+  if (input.type === 'password') { input.type = 'text';     btn.textContent = '🙈'; }
+  else                           { input.type = 'password'; btn.textContent = '👁'; }
+}
+
 function register() {
-  const username = document.getElementById("username").value;
-  const password = document.getElementById("password").value;
+  const username        = document.getElementById("username").value.trim();
+  const phone           = document.getElementById("phone").value.trim();
+  const password        = document.getElementById("password").value;
+  const confirm         = document.getElementById("confirm").value;
+  const securityQuestion = document.getElementById("securityQuestion").value;
+  const securityAnswer  = document.getElementById("securityAnswer").value.trim();
+
+  // ── Client-side validation ──
+  if (!username)              { showMsg("Please enter a username.", "error"); return; }
+  if (username.length < 3)    { showMsg("Username must be at least 3 characters.", "error"); return; }
+  if (!phone)                 { showMsg("Phone number is required.", "error"); return; }
+  if (!/^\d{10}$/.test(phone)){ showMsg("Enter a valid 10-digit phone number.", "error"); return; }
+  if (!password)              { showMsg("Please enter a password.", "error"); return; }
+  if (password.length < 6)    { showMsg("Password must be at least 6 characters.", "error"); return; }
+  if (password !== confirm)   { showMsg("Passwords do not match.", "error"); return; }
+  if (!securityQuestion)      { showMsg("Please select a security question.", "error"); return; }
+  if (!securityAnswer)        { showMsg("Please enter a security answer.", "error"); return; }
+
+  const btn = document.getElementById('regBtn');
+  btn.textContent = 'Creating account…';
+  btn.disabled = true;
 
   fetch("/register", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ username, password })
+    body: JSON.stringify({
+      username,
+      password,
+      phone: '+91' + phone,
+      securityQuestion,
+      securityAnswer
+    })
   })
   .then(res => res.json())
   .then(data => {
-  if (data.error) {
-    alert(data.error);
-  } else {
-    alert("Registered successfully");
-    window.location.href = "/login.html";
-  }
-});
-
+    if (data.error) {
+      showMsg(data.error, "error");
+      btn.textContent = 'Create Account';
+      btn.disabled = false;
+    } else {
+      showMsg("Account created! Redirecting to login…", "success");
+      setTimeout(() => window.location.href = "/login.html", 1000);
+    }
+  })
+  .catch(() => {
+    showMsg("Network error. Please try again.", "error");
+    btn.textContent = 'Create Account';
+    btn.disabled = false;
+  });
 }
-</script>
 
+document.addEventListener('keydown', e => { if (e.key === 'Enter') register(); });
+</script>
 </body>
 </html>

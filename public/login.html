@@ -1,32 +1,109 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Login - Cafe Backyard</title>
-  <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Login · Cafe Backyard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet"/>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    :root{
+      --cream:#F7F0E6;--linen:#EDE3D5;--bark:#C4A882;--soil:#7A5C3E;
+      --espresso:#3B2410;--moss:#5A6B4B;--rust:#B05A2F;--sand:#D9C9B0;
+      --warm-white:#FBF7F2;
+      --fd:'Playfair Display',Georgia,serif;--fb:'DM Sans','Segoe UI',sans-serif;
+    }
+    body{font-family:var(--fb);background:var(--espresso);min-height:100vh;display:flex;flex-direction:column;}
+    body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradient(45deg,transparent,transparent 40px,rgba(255,255,255,0.012) 40px,rgba(255,255,255,0.012) 41px);pointer-events:none;z-index:0;}
+    .page-wrap{flex:1;display:flex;align-items:center;justify-content:center;padding:40px 16px;position:relative;z-index:1;}
+    .auth-card{background:var(--warm-white);border-radius:6px;width:100%;max-width:400px;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,0.4);}
+    .card-head{background:var(--espresso);padding:30px 36px 26px;border-bottom:1px solid rgba(196,168,130,0.2);}
+    .brand{display:flex;align-items:center;gap:10px;margin-bottom:18px;}
+    .brand-dot{width:8px;height:8px;border-radius:50%;background:var(--bark);}
+    .brand-name{font-family:var(--fd);font-size:1rem;color:var(--bark);}
+    .brand-name em{font-style:italic;color:var(--sand);}
+    .card-title{font-family:var(--fd);font-size:1.65rem;color:var(--cream);font-weight:400;}
+    .card-title em{font-style:italic;color:var(--bark);}
+    .card-sub{color:var(--sand);font-size:0.83rem;margin-top:5px;}
+    .card-body{padding:26px 36px 30px;}
+    .field{margin-bottom:16px;}
+    .field label{display:block;font-size:0.71rem;text-transform:uppercase;letter-spacing:0.12em;color:var(--soil);margin-bottom:5px;font-weight:500;}
+    .pw-wrap{position:relative;}
+    .pw-wrap input{padding-right:42px;}
+    .pw-toggle{position:absolute;right:11px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:0.88rem;color:var(--bark);padding:2px;transition:color 0.2s;}
+    .pw-toggle:hover{color:var(--soil);}
+    .field input{width:100%;padding:12px 13px;border:1.5px solid var(--sand);border-radius:3px;font-family:var(--fb);font-size:0.91rem;color:var(--espresso);background:var(--cream);outline:none;transition:border-color 0.2s,box-shadow 0.2s;}
+    .field input:focus{border-color:var(--soil);box-shadow:0 0 0 3px rgba(122,92,62,0.1);}
+    .field input::placeholder{color:var(--bark);}
+    .forgot-link{display:block;text-align:right;font-size:0.78rem;color:var(--rust);text-decoration:none;margin-top:-8px;margin-bottom:18px;}
+    .forgot-link:hover{text-decoration:underline;}
+    .submit-btn{width:100%;padding:13px;background:var(--espresso);color:var(--cream);border:none;border-radius:3px;cursor:pointer;font-family:var(--fb);font-size:0.88rem;font-weight:500;letter-spacing:0.07em;text-transform:uppercase;transition:background 0.2s,transform 0.15s;}
+    .submit-btn:hover{background:var(--rust);transform:translateY(-1px);}
+    .submit-btn:active{transform:scale(0.98);}
+    .submit-btn:disabled{opacity:0.6;cursor:wait;transform:none;}
+    .msg{font-size:0.82rem;text-align:center;margin-top:13px;padding:8px 12px;border-radius:3px;display:none;}
+    .msg.error  {display:block;background:#FEE2E2;color:#991B1B;border:1px solid #FECACA;}
+    .msg.success{display:block;background:#D1FAE5;color:#065F46;border:1px solid #6EE7B7;}
+    .card-footer{text-align:center;margin-top:18px;font-size:0.83rem;color:var(--soil);}
+    .card-footer a{color:var(--rust);text-decoration:none;font-weight:500;}
+    .card-footer a:hover{text-decoration:underline;}
+    .bottom-brand{text-align:center;padding:18px;position:relative;z-index:1;}
+    .bottom-brand p{font-size:0.76rem;color:rgba(196,168,130,0.4);}
+    .bottom-brand strong{color:var(--bark);font-family:var(--fd);font-style:italic;}
+  </style>
 </head>
 <body>
 
-<nav class="navbar">
-  <div class="logo">Cafe Backyard</div>
-  <div class="nav-links">
-    <a href="/">Menu</a>
-    <a href="/offers.html">Offers</a>
+<div class="page-wrap">
+  <div class="auth-card">
+    <div class="card-head">
+      <div class="brand"><div class="brand-dot"></div><div class="brand-name">Cafe <em>Backyard</em></div></div>
+      <h1 class="card-title">Welcome <em>back</em></h1>
+      <p class="card-sub">Sign in to place your order.</p>
+    </div>
+    <div class="card-body">
+      <div class="field">
+        <label>Username</label>
+        <input id="username" type="text" placeholder="your_username" autocomplete="username"/>
+      </div>
+      <div class="field">
+        <label>Password</label>
+        <div class="pw-wrap">
+          <input id="password" type="password" placeholder="••••••••" autocomplete="current-password"/>
+          <button class="pw-toggle" type="button" onclick="togglePw()" id="pwToggle">👁</button>
+        </div>
+      </div>
+      <a href="/forgot-password.html" class="forgot-link">Forgot password?</a>
+      <button class="submit-btn" id="loginBtn" onclick="login()">Sign In</button>
+      <div class="msg" id="msg"></div>
+      <p class="card-footer">New here? <a href="/register.html">Create an account</a></p>
+    </div>
   </div>
-</nav>
+</div>
 
-<h2>Login</h2>
-
-<input id="username" placeholder="Username"><br><br>
-<input id="password" type="password" placeholder="Password"><br><br>
-
-<button onclick="login()">Login</button>
-
-<p>New user? <a href="/register.html">Register here</a></p>
+<div class="bottom-brand"><p>© 2024 <strong>Cafe Backyard</strong> · Made with warmth.</p></div>
 
 <script>
+function showMsg(text, type) {
+  const el = document.getElementById('msg');
+  el.textContent = text; el.className = 'msg ' + type;
+}
+
+function togglePw() {
+  const input = document.getElementById('password');
+  const btn   = document.getElementById('pwToggle');
+  if (input.type === 'password') { input.type = 'text';     btn.textContent = '🙈'; }
+  else                           { input.type = 'password'; btn.textContent = '👁'; }
+}
+
 function login() {
-  const username = document.getElementById("username").value;
+  const username = document.getElementById("username").value.trim();
   const password = document.getElementById("password").value;
+
+  if (!username || !password) { showMsg("Please fill in all fields.", "error"); return; }
+
+  const btn = document.getElementById('loginBtn');
+  btn.textContent = 'Signing in…'; btn.disabled = true;
 
   fetch("/login", {
     method: "POST",
@@ -36,14 +113,20 @@ function login() {
   .then(res => res.json())
   .then(data => {
     if (data.error) {
-      alert(data.error);
+      showMsg(data.error, "error");
+      btn.textContent = 'Sign In'; btn.disabled = false;
     } else {
-      alert("Login successful");
-      window.location.href = "/";
+      showMsg("Login successful! Redirecting…", "success");
+      setTimeout(() => window.location.href = "/", 800);
     }
+  })
+  .catch(() => {
+    showMsg("Network error. Please try again.", "error");
+    btn.textContent = 'Sign In'; btn.disabled = false;
   });
 }
-</script>
 
+document.addEventListener('keydown', e => { if (e.key === 'Enter') login(); });
+</script>
 </body>
 </html>

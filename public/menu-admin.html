@@ -1,30 +1,175 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Menu Admin</title>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Menu Admin · Cafe Backyard</title>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    :root{
+      --cream:#F7F0E6;--linen:#EDE3D5;--bark:#C4A882;--soil:#7A5C3E;
+      --espresso:#3B2410;--moss:#5A6B4B;--rust:#B05A2F;--sand:#D9C9B0;
+      --warm-white:#FBF7F2;
+    }
+    body{font-family:'DM Sans','Segoe UI',sans-serif;background:#f2f2f2;color:#222;min-height:100vh;}
+
+    .navbar{display:flex;justify-content:space-between;align-items:center;background:var(--espresso);padding:0 32px;height:58px;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(0,0,0,0.3);}
+    .logo{font-family:'Playfair Display',Georgia,serif;font-size:1.1rem;color:var(--bark);font-weight:400;}
+    .nav-links{display:flex;gap:4px;}
+    .nav-links a{color:var(--sand);text-decoration:none;font-size:0.82rem;font-weight:500;letter-spacing:0.06em;text-transform:uppercase;padding:7px 14px;border-radius:2px;transition:color 0.2s,background 0.2s;}
+    .nav-links a:hover{color:var(--bark);}
+    .nav-links a.active{color:var(--bark);background:rgba(196,168,130,0.12);}
+
+    .page{max-width:900px;margin:0 auto;padding:36px 24px 80px;}
+    .page-title{font-family:'Playfair Display',Georgia,serif;font-size:1.5rem;color:var(--espresso);font-weight:400;margin-bottom:4px;}
+    .page-title em{font-style:italic;color:var(--rust);}
+    .page-sub{font-size:0.87rem;color:#666;margin-bottom:28px;}
+
+    /* ADD FORM */
+    .add-form{background:#fff;border:1px solid #ddd;border-radius:6px;padding:24px 28px;margin-bottom:32px;}
+    .form-title{font-size:0.85rem;font-weight:600;text-transform:uppercase;letter-spacing:0.1em;color:#555;margin-bottom:18px;}
+    .form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;}
+    .field label{display:block;font-size:0.72rem;text-transform:uppercase;letter-spacing:0.1em;color:#888;margin-bottom:5px;}
+    .field input{width:100%;padding:10px 13px;border:1.5px solid #ddd;border-radius:4px;font-size:0.9rem;color:#222;outline:none;transition:border-color 0.2s;font-family:inherit;}
+    .field input:focus{border-color:var(--soil);}
+
+    /* IMAGE UPLOAD */
+    .image-section{margin-bottom:16px;}
+    .image-section-label{font-size:0.72rem;text-transform:uppercase;letter-spacing:0.1em;color:#888;margin-bottom:8px;display:block;}
+    .image-options{display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:start;}
+
+    .file-upload-box{border:2px dashed #ddd;border-radius:6px;padding:16px;text-align:center;cursor:pointer;transition:border-color 0.2s,background 0.2s;position:relative;}
+    .file-upload-box:hover{border-color:var(--soil);background:#fafafa;}
+    .file-upload-box input[type="file"]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
+    .file-upload-box .upload-icon{font-size:1.8rem;margin-bottom:6px;}
+    .file-upload-box .upload-label{font-size:0.8rem;color:#888;}
+    .file-upload-box .upload-sub{font-size:0.72rem;color:#bbb;margin-top:3px;}
+
+    .image-preview-wrap{position:relative;}
+    #imagePreview{width:100%;height:120px;object-fit:cover;border-radius:6px;display:none;border:1px solid #eee;}
+    .preview-clear{position:absolute;top:6px;right:6px;background:rgba(0,0,0,0.55);color:#fff;border:none;border-radius:50%;width:22px;height:22px;font-size:0.75rem;cursor:pointer;display:none;align-items:center;justify-content:center;}
+
+    .or-divider{display:flex;align-items:center;gap:8px;font-size:0.75rem;color:#bbb;margin:8px 0;}
+    .or-divider::before,.or-divider::after{content:'';flex:1;height:1px;background:#eee;}
+
+    .add-btn{background:var(--espresso);color:#fff;border:none;cursor:pointer;font-size:0.84rem;font-weight:500;letter-spacing:0.06em;text-transform:uppercase;padding:11px 26px;border-radius:4px;transition:background 0.2s;font-family:inherit;}
+    .add-btn:hover{background:var(--rust);}
+
+    /* LIST */
+    .list-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+    .list-title{font-size:1rem;font-weight:600;color:var(--espresso);}
+    .item-count-badge{background:var(--linen);color:var(--soil);font-size:0.75rem;padding:3px 10px;border-radius:12px;font-weight:500;}
+
+    #menuList{display:flex;flex-direction:column;gap:10px;}
+
+    .menu-row{background:#fff;border:1px solid #e8e8e8;border-radius:6px;padding:13px 18px;display:flex;align-items:center;gap:14px;animation:fadeIn 0.25s ease both;}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+
+    .row-img{width:54px;height:54px;border-radius:4px;background:var(--linen);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:1.5rem;overflow:hidden;}
+    .row-img img{width:100%;height:100%;object-fit:cover;border-radius:4px;}
+    .row-info{flex:1;}
+    .row-name{font-size:0.95rem;font-weight:600;color:#222;margin-bottom:3px;}
+    .row-price{font-size:0.82rem;color:#666;}
+
+    .stock-pill{font-size:0.7rem;font-weight:500;letter-spacing:0.08em;text-transform:uppercase;padding:4px 10px;border-radius:12px;}
+    .stock-in{background:#D1FAE5;color:#065F46;border:1px solid #6EE7B7;}
+    .stock-out{background:#FEE2E2;color:#991B1B;border:1px solid #FECACA;}
+
+    .row-actions{display:flex;gap:8px;}
+    .row-btn{font-size:0.76rem;font-weight:500;padding:7px 14px;border-radius:4px;cursor:pointer;border:1px solid #ddd;background:#fff;color:#444;transition:all 0.18s;font-family:inherit;}
+    .row-btn:hover{border-color:var(--soil);color:var(--soil);}
+    .row-btn.danger:hover{border-color:var(--rust);color:var(--rust);}
+
+    .toast{position:fixed;bottom:24px;right:24px;background:var(--espresso);color:#fff;padding:11px 20px;border-radius:4px;font-size:0.85rem;border-left:3px solid var(--bark);opacity:0;transform:translateY(10px);transition:opacity 0.3s,transform 0.3s;pointer-events:none;z-index:500;}
+    .toast.show{opacity:1;transform:translateY(0);}
+    .empty-list{text-align:center;padding:48px 20px;color:#888;font-size:0.9rem;}
+
+    @media(max-width:600px){.form-row,.image-options{grid-template-columns:1fr;}.row-actions{flex-direction:column;}}
+  </style>
 </head>
 <body>
-    <nav class="navbar">
+
+<nav class="navbar">
   <div class="logo">Admin Panel</div>
   <div class="nav-links">
     <a href="/admin.html">Orders</a>
-    <a href="/menu-admin.html">Menu</a>
+    <a href="/menu-admin.html" class="active">Menu</a>
+    <a href="/offers-admin.html">Offers</a>
     <a href="/revenue.html">Revenue</a>
-    <a href="#" onclick="logout()">Logout</a>
+    <a href="#" onclick="logout();return false;">Logout</a>
   </div>
 </nav>
 
-  <h2>🍽 Menu Management</h2>
+<div class="page">
+  <h1 class="page-title">Menu <em>Management</em></h1>
+  <p class="page-sub">Add, update stock, or remove items from the menu.</p>
 
-  <input id="name" placeholder="Dish name">
-<input id="price" placeholder="Price">
-<input id="image" placeholder="Image URL (optional)">
-<button onclick="addItem()">Add Dish</button>
+  <div class="add-form">
+    <p class="form-title">Add new dish</p>
+    <div class="form-row">
+      <div class="field">
+        <label>Dish name</label>
+        <input id="name" placeholder="e.g. Masala Chai"/>
+      </div>
+      <div class="field">
+        <label>Price (₹)</label>
+        <input id="price" type="number" placeholder="e.g. 80"/>
+      </div>
+    </div>
 
+    <!-- IMAGE UPLOAD SECTION -->
+    <div class="image-section">
+      <span class="image-section-label">Dish image</span>
+      <div class="image-options">
+        <div>
+          <div class="file-upload-box" id="uploadBox">
+            <input type="file" id="imageFile" accept="image/*"/>
+            <div class="upload-icon">🖼️</div>
+            <div class="upload-label">Upload from device</div>
+            <div class="upload-sub">JPG, PNG, WEBP · auto-resized</div>
+          </div>
+          <div class="or-divider">or</div>
+          <div class="field">
+            <label>Image URL</label>
+            <input id="image" placeholder="https://..."/>
+          </div>
+        </div>
+        <div class="image-preview-wrap">
+          <img id="imagePreview" alt="Preview"/>
+          <button class="preview-clear" id="previewClear" onclick="clearPreview()">✕</button>
+        </div>
+      </div>
+    </div>
 
-  <hr>
+    <button class="add-btn" onclick="addItem()">+ Add Dish</button>
+  </div>
+
+  <div class="list-header">
+    <span class="list-title">Current menu</span>
+    <span class="item-count-badge" id="item-count">0 items</span>
+  </div>
   <div id="menuList"></div>
+</div>
 
-  <script src="menu-admin.js"></script>
+<div class="toast" id="toast"></div>
+<script src="menu-admin.js"></script>
+<script>
+function clearPreview() {
+  const preview = document.getElementById('imagePreview');
+  const fileInput = document.getElementById('imageFile');
+  const clearBtn = document.getElementById('previewClear');
+  preview.src = ''; preview.style.display = 'none';
+  clearBtn.style.display = 'none';
+  fileInput.value = '';
+}
+// Show clear button when preview is loaded
+document.getElementById('imagePreview').addEventListener('load', function() {
+  const clearBtn = document.getElementById('previewClear');
+  if (this.src && this.src !== window.location.href) {
+    this.style.display = 'block';
+    clearBtn.style.display = 'flex';
+  }
+});
+</script>
 </body>
 </html>
