@@ -1,23 +1,105 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Revenue Dashboard</title>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Revenue · Admin</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet"/>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    :root{
+      --cream:#F7F0E6;--linen:#EDE3D5;--bark:#C4A882;--soil:#7A5C3E;
+      --espresso:#3B2410;--moss:#5A6B4B;--rust:#B05A2F;--sand:#D9C9B0;
+      --warm-white:#FBF7F2;
+      --fd:'Playfair Display',Georgia,serif;--fb:'DM Sans','Segoe UI',sans-serif;
+    }
+    body{font-family:var(--fb);background:#f2f2f2;color:#222;min-height:100vh;}
+
+    .navbar{display:flex;justify-content:space-between;align-items:center;background:var(--espresso);padding:0 32px;height:58px;position:sticky;top:0;z-index:200;box-shadow:0 2px 12px rgba(0,0,0,0.3);}
+    .logo{font-family:var(--fd);font-size:1.1rem;color:var(--bark);font-weight:400;}
+    .nav-links{display:flex;gap:4px;}
+    .nav-links a{color:var(--sand);text-decoration:none;font-size:0.82rem;font-weight:500;letter-spacing:0.06em;text-transform:uppercase;padding:7px 14px;border-radius:2px;transition:color 0.2s,background 0.2s;}
+    .nav-links a:hover{color:var(--bark);}
+    .nav-links a.active{color:var(--bark);background:rgba(196,168,130,0.12);}
+
+    .page{max-width:900px;margin:0 auto;padding:36px 24px 80px;}
+    .page-title{font-family:var(--fd);font-size:1.6rem;color:var(--espresso);font-weight:400;margin-bottom:28px;}
+    .page-title em{font-style:italic;color:var(--rust);}
+
+    /* BIG STAT CARDS */
+    .big-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-bottom:32px;}
+    .big-card{background:#fff;border:1px solid #e8e8e8;border-radius:8px;padding:22px 24px;position:relative;overflow:hidden;}
+    .big-card::before{content:'';position:absolute;top:0;left:0;width:4px;height:100%;background:var(--bark);}
+    .big-card.accent::before{background:var(--rust);}
+    .big-card.green::before{background:var(--moss);}
+    .big-card.blue::before{background:#378ADD;}
+    .big-label{font-size:0.7rem;text-transform:uppercase;letter-spacing:0.13em;color:#888;margin-bottom:8px;}
+    .big-value{font-family:var(--fd);font-size:2rem;color:var(--espresso);line-height:1;}
+    .big-sub{font-size:0.78rem;color:#aaa;margin-top:5px;}
+
+    /* SECTION */
+    .section-title{font-size:0.85rem;font-weight:600;text-transform:uppercase;letter-spacing:0.1em;color:#666;margin:28px 0 14px;}
+
+    /* CHART */
+    .chart-card{background:#fff;border:1px solid #e8e8e8;border-radius:8px;padding:22px 24px;margin-bottom:28px;}
+    .chart-wrap{position:relative;height:220px;}
+
+    /* RECENT TABLE */
+    .table-card{background:#fff;border:1px solid #e8e8e8;border-radius:8px;overflow:hidden;}
+    .table-card table{width:100%;border-collapse:collapse;}
+    .table-card th{font-size:0.68rem;text-transform:uppercase;letter-spacing:0.1em;color:#999;text-align:left;padding:10px 16px;border-bottom:1px solid #f0f0f0;font-weight:500;}
+    .table-card td{padding:10px 16px;font-size:0.84rem;color:#333;border-bottom:1px solid #f9f9f9;}
+    .table-card tr:last-child td{border-bottom:none;}
+    .table-card tr:hover td{background:#fafafa;}
+    .delivered-pill{display:inline-block;background:#ECFDF5;color:#047857;border:1px solid #A7F3D0;font-size:0.65rem;font-weight:500;letter-spacing:0.08em;text-transform:uppercase;padding:3px 8px;border-radius:2px;}
+
+    .empty-msg{text-align:center;padding:40px;color:#aaa;font-size:0.9rem;}
+  </style>
 </head>
 <body>
+
 <nav class="navbar">
   <div class="logo">Admin Panel</div>
   <div class="nav-links">
     <a href="/admin.html">Orders</a>
     <a href="/menu-admin.html">Menu</a>
-    <a href="/revenue.html">Revenue</a>
-    <a href="#" onclick="logout()">Logout</a>
+    <a href="/offers-admin.html">Offers</a>
+    <a href="/revenue.html" class="active">Revenue</a>
+    <a href="#" onclick="logout();return false;">Logout</a>
   </div>
 </nav>
 
-  <h2>📊 Revenue Dashboard</h2>
+<div class="page">
+  <h1 class="page-title">Revenue <em>Dashboard</em></h1>
 
-  <div id="stats"></div>
+  <div class="big-stats" id="big-stats">
+    <!-- filled by JS -->
+  </div>
 
-  <script src="revenue.js"></script>
+  <p class="section-title">Orders over time</p>
+  <div class="chart-card">
+    <div class="chart-wrap">
+      <canvas id="revenueChart"></canvas>
+    </div>
+  </div>
+
+  <p class="section-title">Recent delivered orders</p>
+  <div class="table-card">
+    <table>
+      <thead>
+        <tr>
+          <th>Order ID</th>
+          <th>Items</th>
+          <th>Amount</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody id="orders-table"></tbody>
+    </table>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="revenue.js"></script>
 </body>
 </html>

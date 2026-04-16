@@ -1,26 +1,150 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>My Profile - Cafe Backyard</title>
-  <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Orders · Cafe Backyard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --cream:#F7F0E6; --linen:#EDE3D5; --bark:#C4A882; --soil:#7A5C3E;
+      --espresso:#3B2410; --moss:#5A6B4B; --rust:#B05A2F; --sand:#D9C9B0;
+      --warm-white:#FBF7F2;
+      --fd:'Playfair Display',Georgia,serif; --fb:'DM Sans','Segoe UI',sans-serif;
+    }
+    body { font-family:var(--fb); background:var(--cream); color:var(--espresso); min-height:100vh; }
+
+    .navbar {
+      display:flex; justify-content:space-between; align-items:center;
+      background:var(--espresso); padding:0 5vw; height:62px;
+      position:sticky; top:0; z-index:200; box-shadow:0 2px 16px rgba(0,0,0,0.3);
+    }
+    .logo { font-family:var(--fd); font-size:1.3rem; color:var(--bark); }
+    .logo em { font-style:italic; color:var(--cream); }
+    .nav-links { display:flex; align-items:center; gap:2px; }
+    .nav-links a { color:var(--sand); text-decoration:none; font-size:0.82rem; font-weight:500; letter-spacing:0.07em; text-transform:uppercase; padding:8px 12px; border-radius:2px; transition:color 0.2s; }
+    .nav-links a:hover { color:var(--bark); }
+    .nav-links a.active { color:var(--bark); }
+    #logoutLink { background:rgba(196,168,130,0.15); border:1px solid rgba(196,168,130,0.3); color:var(--bark) !important; margin-left:4px; }
+
+    .page-header { background:var(--espresso); padding:52px 5vw 46px; position:relative; overflow:hidden; }
+    .page-header::before { content:''; position:absolute; inset:0; background:repeating-linear-gradient(45deg,transparent,transparent 40px,rgba(255,255,255,0.012) 40px,rgba(255,255,255,0.012) 41px); }
+    .page-eyebrow { font-size:0.72rem; letter-spacing:0.18em; text-transform:uppercase; color:var(--bark); margin-bottom:10px; display:flex; align-items:center; gap:10px; position:relative; }
+    .page-eyebrow::before { content:''; display:block; width:28px; height:1px; background:var(--bark); }
+    .page-header h1 { font-family:var(--fd); font-size:clamp(1.8rem,4vw,2.7rem); color:var(--cream); line-height:1.15; position:relative; font-weight:400; }
+    .page-header h1 em { font-style:italic; color:var(--bark); }
+    .page-header p { color:var(--sand); font-size:0.9rem; margin:8px 0 0; position:relative; }
+
+    .content { max-width:800px; margin:0 auto; padding:40px 5vw 80px; }
+
+    .summary-strip { display:grid; grid-template-columns:repeat(auto-fit,minmax(130px,1fr)); gap:12px; margin-bottom:32px; }
+    .s-card { background:var(--warm-white); border:1px solid var(--linen); border-radius:4px; padding:16px 18px; }
+    .s-label { font-size:0.69rem; text-transform:uppercase; letter-spacing:0.12em; color:var(--soil); margin-bottom:5px; }
+    .s-value { font-family:var(--fd); font-size:1.5rem; color:var(--espresso); line-height:1; }
+    .s-value.accent { color:var(--rust); }
+
+    #orders { display:flex; flex-direction:column; gap:13px; }
+
+    .order-card { background:var(--warm-white); border:1px solid var(--linen); border-radius:4px; overflow:hidden; animation:fadeUp 0.35s ease both; }
+    @keyframes fadeUp { from{opacity:0;transform:translateY(12px);} to{opacity:1;transform:translateY(0);} }
+
+    .oc-header { display:flex; align-items:center; justify-content:space-between; padding:14px 20px; gap:10px; flex-wrap:wrap; cursor:pointer; transition:background 0.15s; border-bottom:1px solid transparent; }
+    .oc-header:hover { background:var(--cream); }
+    .order-card.expanded .oc-header { border-bottom-color:var(--linen); }
+    .oc-meta { display:flex; flex-direction:column; gap:2px; }
+    .oc-id { font-size:0.7rem; text-transform:uppercase; letter-spacing:0.12em; color:var(--soil); }
+    .oc-date { font-size:0.79rem; color:var(--soil); }
+    .oc-right { display:flex; align-items:center; gap:11px; flex-wrap:wrap; }
+    .oc-amount { font-family:var(--fd); font-size:1.1rem; color:var(--espresso); }
+    .chevron { color:var(--sand); font-size:0.73rem; transition:transform 0.25s; }
+    .order-card.expanded .chevron { transform:rotate(180deg); }
+
+    .status-badge { font-size:0.67rem; font-weight:500; letter-spacing:0.1em; text-transform:uppercase; padding:4px 10px; border-radius:2px; white-space:nowrap; }
+    .status-pending          { background:#FEF3C7; color:#92400E; border:1px solid #FDE68A; }
+    .status-accepted         { background:#D1FAE5; color:#065F46; border:1px solid #6EE7B7; }
+    .status-out_for_delivery { background:#DBEAFE; color:#1E40AF; border:1px solid #BFDBFE; }
+    .status-delivered        { background:#ECFDF5; color:#047857; border:1px solid #A7F3D0; }
+    .status-declined         { background:#FEE2E2; color:#991B1B; border:1px solid #FECACA; }
+    .status-cancelled        { background:#F3F4F6; color:#6B7280; border:1px solid #E5E7EB; }
+
+    .oc-body { max-height:0; overflow:hidden; transition:max-height 0.35s cubic-bezier(0.4,0,0.2,1); }
+    .order-card.expanded .oc-body { max-height:700px; }
+    .oc-body-inner { padding:17px 20px; }
+
+    .tracker { display:flex; align-items:flex-start; margin-bottom:18px; overflow-x:auto; padding-bottom:4px; }
+    .t-step { display:flex; flex-direction:column; align-items:center; flex:1; min-width:65px; position:relative; }
+    .t-step:not(:last-child)::after { content:''; position:absolute; top:10px; left:50%; width:100%; height:2px; background:var(--linen); z-index:0; }
+    .t-step.done:not(:last-child)::after { background:var(--moss); }
+    .t-dot { width:21px; height:21px; border-radius:50%; border:2px solid var(--linen); background:var(--warm-white); display:flex; align-items:center; justify-content:center; font-size:0.6rem; z-index:1; position:relative; transition:all 0.3s; flex-shrink:0; }
+    .t-step.done .t-dot    { background:var(--moss); border-color:var(--moss); color:#fff; }
+    .t-step.current .t-dot { background:var(--bark); border-color:var(--bark); box-shadow:0 0 0 4px rgba(196,168,130,0.25); }
+    .t-step.bad .t-dot     { background:var(--rust); border-color:var(--rust); color:#fff; }
+    .t-label { font-size:0.59rem; text-transform:uppercase; letter-spacing:0.07em; color:var(--soil); margin-top:5px; text-align:center; line-height:1.3; }
+    .t-step.done .t-label    { color:var(--moss); font-weight:500; }
+    .t-step.current .t-label { color:var(--bark); font-weight:500; }
+
+    .items-table { width:100%; border-collapse:collapse; margin-bottom:13px; }
+    .items-table th { font-size:0.67rem; text-transform:uppercase; letter-spacing:0.1em; color:var(--soil); text-align:left; padding:0 0 6px; border-bottom:1px solid var(--linen); font-weight:500; }
+    .items-table th:last-child { text-align:right; }
+    .items-table td { padding:8px 0; font-size:0.85rem; border-bottom:1px solid var(--linen); color:var(--espresso); vertical-align:middle; }
+    .items-table td:last-child { text-align:right; color:var(--rust); font-weight:500; }
+    .items-table tr:last-child td { border-bottom:none; }
+    .iqty { display:inline-block; background:var(--linen); color:var(--soil); font-size:0.67rem; padding:2px 6px; border-radius:2px; margin-right:5px; font-weight:500; }
+
+    .oc-address { font-size:0.82rem; color:var(--soil); border-top:1px solid var(--linen); padding-top:12px; display:flex; gap:7px; align-items:flex-start; }
+    .oc-addr-lbl { font-size:0.67rem; text-transform:uppercase; letter-spacing:0.1em; color:var(--bark); flex-shrink:0; }
+
+    .cancel-row { margin-top:13px; text-align:right; }
+    .cancel-btn { background:transparent; border:1px solid var(--linen); color:var(--soil); cursor:pointer; font-family:var(--fb); font-size:0.76rem; padding:7px 15px; border-radius:2px; transition:border-color 0.2s,color 0.2s; }
+    .cancel-btn:hover { border-color:var(--rust); color:var(--rust); }
+
+    .empty-state { text-align:center; padding:68px 20px; background:var(--warm-white); border:1px solid var(--linen); border-radius:4px; }
+    .empty-state .icon { font-size:3rem; margin-bottom:13px; }
+    .empty-state h3 { font-family:var(--fd); font-size:1.3rem; margin-bottom:7px; }
+    .empty-state p { color:var(--soil); font-size:0.87rem; margin-bottom:19px; }
+    .empty-state a { display:inline-block; background:var(--espresso); color:var(--cream); text-decoration:none; font-size:0.81rem; font-weight:500; letter-spacing:0.06em; text-transform:uppercase; padding:10px 22px; border-radius:2px; transition:background 0.2s; }
+    .empty-state a:hover { background:var(--rust); }
+
+    .toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(20px); background:var(--espresso); color:var(--cream); padding:11px 24px; border-radius:2px; font-size:0.85rem; font-weight:500; border-left:3px solid var(--bark); opacity:0; transition:opacity 0.3s,transform 0.3s; pointer-events:none; z-index:500; white-space:nowrap; }
+    .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+
+    footer { background:var(--espresso); color:var(--sand); text-align:center; padding:28px 5vw; font-size:0.82rem; border-top:1px solid rgba(196,168,130,0.15); }
+    footer strong { color:var(--bark); font-family:var(--fd); font-style:italic; }
+
+    @media (max-width:600px) { .summary-strip { grid-template-columns:1fr 1fr; } }
+  </style>
 </head>
 <body>
 
 <nav class="navbar">
-  <div class="logo">Cafe Backyard</div>
+  <div class="logo">Cafe <em>Backyard</em></div>
   <div class="nav-links" id="navLinks">
     <a href="/">Menu</a>
     <a href="/offers.html">Offers</a>
-    <a href="/profile.html">My Orders</a>
+    <a href="/profile.html" class="active">My Orders</a>
+    <a href="/cart.html">🛒 Cart</a>
     <a href="/login.html" id="loginLink">Login</a>
-    <a href="#" id="logoutLink" style="display:none;" onclick="logout()">Logout</a>
+    <a href="#" id="logoutLink" style="display:none;" onclick="logout(); return false;">Logout</a>
   </div>
 </nav>
 
-<h2>👤 My Orders</h2>
+<div class="page-header">
+  <p class="page-eyebrow">Your history</p>
+  <h1>My <em>Orders</em></h1>
+  <p>Track active orders and browse your past orders.</p>
+</div>
 
-<div id="orders"></div>
+<div class="content">
+  <div id="summary-strip" class="summary-strip" style="display:none"></div>
+  <div id="orders"></div>
+</div>
 
+<footer>
+  <p>© 2024 <strong>Cafe Backyard</strong> · Made with warmth &amp; good beans.</p>
+</footer>
+
+<div class="toast" id="toast"></div>
 <script src="profile.js"></script>
 </body>
 </html>

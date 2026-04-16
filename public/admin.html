@@ -1,27 +1,157 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Cafe Backyard – Admin</title>
-  <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Orders · Admin</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet"/>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    :root{
+      --cream:#F7F0E6;--linen:#EDE3D5;--bark:#C4A882;--soil:#7A5C3E;
+      --espresso:#3B2410;--moss:#5A6B4B;--rust:#B05A2F;--sand:#D9C9B0;
+      --warm-white:#FBF7F2;
+      --fd:'Playfair Display',Georgia,serif;--fb:'DM Sans','Segoe UI',sans-serif;
+    }
+    body{font-family:var(--fb);background:#f2f2f2;color:#222;min-height:100vh;}
+
+    /* NAV */
+    .navbar{display:flex;justify-content:space-between;align-items:center;background:var(--espresso);padding:0 32px;height:58px;position:sticky;top:0;z-index:200;box-shadow:0 2px 12px rgba(0,0,0,0.3);}
+    .logo{font-family:var(--fd);font-size:1.1rem;color:var(--bark);font-weight:400;}
+    .nav-links{display:flex;gap:4px;}
+    .nav-links a{color:var(--sand);text-decoration:none;font-size:0.82rem;font-weight:500;letter-spacing:0.06em;text-transform:uppercase;padding:7px 14px;border-radius:2px;transition:color 0.2s,background 0.2s;}
+    .nav-links a:hover{color:var(--bark);}
+    .nav-links a.active{color:var(--bark);background:rgba(196,168,130,0.12);}
+
+    /* PAGE */
+    .page{max-width:1000px;margin:0 auto;padding:36px 24px 80px;}
+    .page-top{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px;}
+    .page-title{font-family:var(--fd);font-size:1.6rem;color:var(--espresso);font-weight:400;}
+    .page-title em{font-style:italic;color:var(--rust);}
+
+    /* FILTER TABS */
+    .filter-tabs{display:flex;gap:8px;flex-wrap:wrap;}
+    .ftab{background:#fff;border:1px solid #ddd;color:#555;font-family:var(--fb);font-size:0.76rem;font-weight:500;letter-spacing:0.06em;text-transform:uppercase;padding:6px 14px;border-radius:2px;cursor:pointer;transition:all 0.18s;}
+    .ftab:hover{border-color:var(--soil);color:var(--soil);}
+    .ftab.active{background:var(--espresso);border-color:var(--espresso);color:#fff;}
+
+    /* STATS */
+    .stats-strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-bottom:24px;}
+    .stat-card{background:#fff;border:1px solid #e8e8e8;border-radius:6px;padding:14px 16px;}
+    .stat-label{font-size:0.68rem;text-transform:uppercase;letter-spacing:0.12em;color:#888;margin-bottom:4px;}
+    .stat-value{font-family:var(--fd);font-size:1.5rem;color:var(--espresso);line-height:1;}
+    .stat-value.accent{color:var(--rust);}
+
+    /* ORDER LIST */
+    #orders-list{display:flex;flex-direction:column;gap:12px;}
+
+    /* ORDER CARD */
+    .order-card{background:#fff;border:1px solid #e8e8e8;border-radius:6px;overflow:hidden;animation:fadeUp 0.3s ease both;}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+
+    .oc-head{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;gap:10px;flex-wrap:wrap;cursor:pointer;transition:background 0.15s;border-bottom:1px solid transparent;}
+    .oc-head:hover{background:#fafafa;}
+    .order-card.expanded .oc-head{border-bottom-color:#eee;}
+    .oc-meta{display:flex;flex-direction:column;gap:2px;}
+    .oc-id{font-size:0.7rem;text-transform:uppercase;letter-spacing:0.12em;color:#999;}
+    .oc-date{font-size:0.78rem;color:#999;}
+    .oc-right{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+    .oc-amount{font-family:var(--fd);font-size:1.1rem;color:var(--espresso);}
+    .chevron{color:#ccc;font-size:0.73rem;transition:transform 0.25s;}
+    .order-card.expanded .chevron{transform:rotate(180deg);}
+
+    /* STATUS BADGES */
+    .status-badge{font-size:0.67rem;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;padding:4px 10px;border-radius:2px;white-space:nowrap;}
+    .status-pending         {background:#FEF3C7;color:#92400E;border:1px solid #FDE68A;}
+    .status-accepted        {background:#D1FAE5;color:#065F46;border:1px solid #6EE7B7;}
+    .status-out_for_delivery{background:#DBEAFE;color:#1E40AF;border:1px solid #BFDBFE;}
+    .status-delivered       {background:#ECFDF5;color:#047857;border:1px solid #A7F3D0;}
+    .status-declined        {background:#FEE2E2;color:#991B1B;border:1px solid #FECACA;}
+    .status-cancelled       {background:#F3F4F6;color:#6B7280;border:1px solid #E5E7EB;}
+
+    /* COLLAPSIBLE */
+    .oc-body{max-height:0;overflow:hidden;transition:max-height 0.35s cubic-bezier(0.4,0,0.2,1);}
+    .order-card.expanded .oc-body{max-height:700px;}
+    .oc-body-inner{padding:16px 18px;}
+
+    /* INFO GRID (address + phone) */
+    .oc-info-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid #f0f0f0;}
+    .oc-info-row{display:flex;flex-direction:column;gap:3px;}
+    .oc-info-lbl{font-size:0.66rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--bark);font-weight:500;}
+    .oc-info-val{font-size:0.85rem;color:#333;line-height:1.4;}
+    .oc-info-val.muted{color:#aaa;font-style:italic;}
+    .oc-phone{font-size:0.85rem;color:var(--moss);text-decoration:none;font-weight:500;}
+    .oc-phone:hover{text-decoration:underline;}
+
+    /* ITEMS TABLE */
+    .items-table{width:100%;border-collapse:collapse;margin-bottom:12px;}
+    .items-table th{font-size:0.67rem;text-transform:uppercase;letter-spacing:0.1em;color:#999;text-align:left;padding:0 0 6px;border-bottom:1px solid #f0f0f0;font-weight:500;}
+    .items-table th:last-child{text-align:right;}
+    .items-table td{padding:7px 0;font-size:0.85rem;border-bottom:1px solid #f9f9f9;color:#333;vertical-align:middle;}
+    .items-table td:last-child{text-align:right;color:var(--rust);font-weight:500;}
+    .items-table tr:last-child td{border-bottom:none;}
+    .iqty{display:inline-block;background:#f0f0f0;color:#666;font-size:0.67rem;padding:2px 6px;border-radius:2px;margin-right:5px;font-weight:500;}
+
+    /* ACTION BUTTONS */
+    .action-row{display:flex;gap:8px;flex-wrap:wrap;}
+    .act-btn{font-family:var(--fb);font-size:0.75rem;font-weight:500;padding:8px 14px;border-radius:4px;cursor:pointer;border:1px solid #e0e0e0;background:#fff;color:#444;transition:all 0.18s;white-space:nowrap;}
+    .act-btn:hover{transform:translateY(-1px);}
+    .act-btn:active{transform:scale(0.97);}
+    .act-btn:disabled{opacity:0.45;cursor:not-allowed;transform:none;}
+    .act-btn.loading{opacity:0.6;cursor:wait;}
+    .act-btn.accept  {border-color:#6EE7B7;color:#065F46;background:#F0FDF4;}
+    .act-btn.accept:hover{background:#D1FAE5;}
+    .act-btn.deliver {border-color:#6EE7B7;color:#047857;background:#ECFDF5;}
+    .act-btn.deliver:hover{background:#A7F3D0;}
+    .act-btn.dispatch{border-color:#BFDBFE;color:#1E40AF;background:#EFF6FF;}
+    .act-btn.dispatch:hover{background:#DBEAFE;}
+    .act-btn.decline {border-color:#FECACA;color:#991B1B;background:#FFF5F5;}
+    .act-btn.decline:hover{background:#FEE2E2;}
+
+    .terminal-msg{font-size:0.8rem;color:#aaa;margin-top:10px;font-style:italic;}
+
+    .empty-state{text-align:center;padding:60px 20px;background:#fff;border:1px solid #e8e8e8;border-radius:6px;color:#888;}
+    .empty-state .icon{font-size:3rem;margin-bottom:12px;}
+
+    /* TOAST */
+    .toast{position:fixed;bottom:24px;right:24px;background:var(--espresso);color:#fff;padding:11px 20px;border-radius:4px;font-size:0.85rem;border-left:3px solid var(--bark);opacity:0;transform:translateY(10px);transition:opacity 0.3s,transform 0.3s;pointer-events:none;z-index:500;}
+    .toast.show{opacity:1;transform:translateY(0);}
+
+    @media(max-width:600px){.oc-info-grid{grid-template-columns:1fr;}}
+  </style>
 </head>
 <body>
-  <nav class="navbar">
+
+<nav class="navbar">
   <div class="logo">Admin Panel</div>
   <div class="nav-links">
-    <a href="/admin.html">Orders</a>
-    <a href="/offers-admin.html">Offers</a>
+    <a href="/admin.html" class="active">Orders</a>
     <a href="/menu-admin.html">Menu</a>
+    <a href="/offers-admin.html">Offers</a>
     <a href="/revenue.html">Revenue</a>
-    <a href="#" onclick="logout()">Logout</a>
+    <a href="#" onclick="logout();return false;">Logout</a>
   </div>
 </nav>
 
-  <button onclick="logout()">Logout</button>
-  <hr>
-  <h1>💼 Cafe Backyard – Admin Dashboard</h1>
+<div class="page">
+  <div class="page-top">
+    <h1 class="page-title">Order <em>Dashboard</em></h1>
+    <div class="filter-tabs" id="filter-tabs">
+      <button class="ftab active" data-filter="all">All</button>
+      <button class="ftab" data-filter="pending">Pending</button>
+      <button class="ftab" data-filter="accepted">Accepted</button>
+      <button class="ftab" data-filter="out_for_delivery">Dispatched</button>
+      <button class="ftab" data-filter="delivered">Delivered</button>
+      <button class="ftab" data-filter="cancelled">Cancelled</button>
+      <button class="ftab" data-filter="declined">Declined</button>
+    </div>
+  </div>
 
-  <div id="orders"></div>
+  <div class="stats-strip" id="stats-strip"></div>
+  <div id="orders-list"></div>
+</div>
 
-  <script src="admin.js"></script>
+<div class="toast" id="toast"></div>
+<script src="admin.js"></script>
 </body>
 </html>
